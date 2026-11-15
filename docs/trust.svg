@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 330" width="880" height="330" role="img" aria-labelledby="title">
+  <title id="title">Who can do what. Owner: open, close, pull out after timeout. Server: charge usage up to the lock. Admin: revoke the server at once, install a new one only after notice. Nobody can move tokens anywhere but back to the owner or to the sink.</title>
+  <!-- Icons: Lucide (lucide.dev), ISC License, see docs/lucide-LICENSE.txt -->
+  <style>
+    .bg{fill:#f3f3f4;stroke:#e4e4e6}.sep{stroke:#e4e4e6}
+    .ink{fill:#2c2c2c}.mute{fill:#8a8a8d}.acc{fill:#1e61f5}.accS{stroke:#1e61f5;fill:none}
+    .noS{stroke:#c8c8cb}.inv{fill:#fff}.invS{stroke:#8a8a8d}.cw{color:#fff}.cb{color:#1e61f5}
+    .t{font-family:Figtree,Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+    .m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.08em}
+    @media (prefers-color-scheme:dark){
+      .bg{fill:#111113;stroke:#2c2c30}.sep{stroke:#2c2c30}
+      .ink{fill:#ececee}.acc{fill:#3d74ff}.accS{stroke:#3d74ff}.cb{color:#3d74ff}.noS{stroke:#3a3a3f}.inv{fill:#111113}.invS{stroke:#6b6b70}
+    }
+  </style>
+  <defs>
+    <symbol id="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+    <g id="y"><rect x="-12" y="-12" width="24" height="24" rx="5" class="acc"/><use href="#check" x="-7" y="-7" width="14" height="14" class="cw"/></g>
+    <g id="n"><path class="noS" stroke-width="2" stroke-linecap="round" d="M-6 0h12"/></g>
+    <g id="w"><rect x="-11" y="-11" width="22" height="22" rx="5" class="accS" stroke-width="1.75"/><use href="#clock" x="-7" y="-7" width="14" height="14" class="cb"/></g>
+    <g id="x"><path class="invS" stroke-width="2" stroke-linecap="round" d="M-6 0h12"/></g>
+  </defs>
+  <rect class="bg" x="0.5" y="0.5" width="879" height="329" rx="10"/>
+
+  <g class="t m mute" font-size="11" font-weight="600" text-anchor="middle">
+    <text x="580" y="44">OWNER</text><text x="690" y="44">SERVER</text><text x="800" y="44">ADMIN</text>
+  </g>
+  <g class="t ink" font-size="14">
+    <text x="40" y="91">Open and close a tab</text>
+    <text x="40" y="131">Pull tokens out after the timeout</text>
+    <text x="40" y="171">Charge usage, never above the lock</text>
+    <text x="40" y="211">Revoke the server</text>
+    <text x="40" y="251">Install a new server <tspan class="mute">· only after notice</tspan></text>
+  </g>
+  <g class="sep" stroke-width="1"><path d="M30 106.5h820M30 146.5h820M30 186.5h820M30 226.5h820"/></g>
+
+  <use href="#y" x="580" y="86"/><use href="#n" x="690" y="86"/><use href="#n" x="800" y="86"/>
+  <use href="#y" x="580" y="126"/><use href="#n" x="690" y="126"/><use href="#n" x="800" y="126"/>
+  <use href="#n" x="580" y="166"/><use href="#y" x="690" y="166"/><use href="#n" x="800" y="166"/>
+  <use href="#n" x="580" y="206"/><use href="#n" x="690" y="206"/><use href="#y" x="800" y="206"/>
+  <use href="#n" x="580" y="246"/><use href="#n" x="690" y="246"/><use href="#w" x="800" y="246"/>
+
+  <rect class="ink" x="16" y="268" width="848" height="46" rx="6"/>
+  <text x="40" y="297" class="t inv" font-size="14" font-weight="700">Move tokens anywhere but back to you or the sink</text>
+  <use href="#x" x="580" y="291"/><use href="#x" x="690" y="291"/><use href="#x" x="800" y="291"/>
+</svg>

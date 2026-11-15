@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>omni-tokens</title>
+<meta name="description" content="Lock any token, get an OpenRouter key, get the change back.">
+<link rel="icon" href="data:,">
+<!-- Icons: Lucide (lucide.dev), ISC License, see docs/lucide-LICENSE.txt -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap">
+<style>
+  :root {
+    --bg: #f3f3f4; --panel: #ffffff; --pad: #eeeeef; --text: #2c2c2c; --muted: #8a8a8d; --line: #e4e4e6;
+    --accent: #1e61f5; --accent-text: #ffffff; --good: #1b9e57; --bad: #d11a2a; --bar: #e4e4e6;
+    --sans: Figtree, Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111113; --panel: #1b1b1e; --pad: #222226; --text: #ececee; --muted: #8a8a8d; --line: #2c2c30;
+      --accent: #3d74ff; --accent-text: #ffffff; --good: #34c27a; --bad: #ff5a64; --bar: #2c2c30;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--sans); }
+  main { max-width: 680px; margin: 0 auto; padding: 48px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 2px solid var(--text); }
+  h1 { font: 800 32px/1 var(--sans); margin: 0 0 10px; letter-spacing: -0.035em; }
+  h2 { font: 600 11px/1 var(--mono); text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 0 0 16px; }
+  p { margin: 0; }
+  .muted { color: var(--muted); }
+  .mono { font-family: var(--mono); font-size: 13px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 22px; margin-bottom: 12px; }
+  button { font: inherit; font-weight: 700; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-text); border-radius: 6px; padding: 11px 18px; cursor: pointer; white-space: nowrap; }
+  button:hover:not(:disabled) { filter: brightness(1.08); }
+  button.ghost { background: transparent; color: var(--text); border-color: var(--line); }
+  button.ghost:hover:not(:disabled) { border-color: var(--text); filter: none; }
+  button:disabled { opacity: 0.4; cursor: default; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .grow { flex: 1; min-width: 120px; }
+  input, select { font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; width: 100%; outline: none; }
+  input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+  label { display: block; font: 600 11px/1 var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; }
+  .quote { margin: 14px 0 16px; min-height: 22px; }
+  .quote b { color: var(--accent); }
+  .status { margin-top: 12px; font-size: 14px; }
+  .status:empty { display: none; }
+  .status.bad { color: var(--bad); }
+  #reveal { border-left: 3px solid var(--accent); }
+  .key { background: var(--pad); border-radius: 6px; padding: 12px 14px; word-break: break-all; margin: 14px 0; }
+  .tab { border-top: 1px solid var(--line); padding: 16px 0; }
+  .tab:first-of-type { border-top: 0; padding-top: 0; }
+  .pill { font: 600 10px/1 var(--mono); text-transform: uppercase; letter-spacing: 0.1em; padding: 5px 8px; border: 1px solid currentColor; border-radius: 4px; }
+  .pill.active { color: var(--accent-text); background: var(--accent); border-color: var(--accent); }
+  .pill.settling, .pill.closing, .pill.activating { color: var(--accent); }
+  .pill.closed, .pill.open { color: var(--muted); }
+  .bar { height: 6px; background: var(--bar); border-radius: 3px; overflow: hidden; margin: 10px 0 8px; }
+  .bar > div { height: 100%; background: var(--accent); width: 0; transition: width 0.4s; }
+  .facts { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 13px; }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .step { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 14px; border-left: 1px solid var(--line); }
+  .step:first-child { border-left: 0; }
+  .step i { font: 600 11px/1 var(--mono); font-style: normal; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 10px; }
+  .step svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 10px; }
+  .step span { font-size: 13px; color: var(--muted); }
+  .step.go { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  .step.go i, .step.go span { color: var(--accent-text); opacity: 0.8; }
+  .step .good { color: var(--good); }
+  @media (max-width: 480px) { .step { padding: 12px 10px; } .step span { font-size: 12px; } }
+  footer { font-size: 13px; color: var(--muted); margin-top: 24px; }
+  footer a { color: inherit; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>omni-tokens</h1>
+      <p class="muted">From ledger to language. What you don't spend comes home.</p>
+    </div>
+    <button id="connect">Connect wallet</button>
+  </header>
+
+  <section>
+    <h2>Open a tab</h2>
+    <div class="row">
+      <div class="grow"><label for="token">Token</label><select id="token"></select></div>
+      <div class="grow"><label for="amount">Amount</label><input id="amount" inputmode="decimal" placeholder="0.0" autocomplete="off"></div>
+    </div>
+    <p class="quote" id="quote"><span class="muted">Loading…</span></p>
+    <button id="open" disabled>Open tab</button>
+    <p class="status" id="status"></p>
+  </section>
+
+  <section id="reveal" hidden>
+    <h2>Your key</h2>
+    <p>Shown once. Paste it into anything that speaks OpenRouter: Cursor, Cline, Open WebUI, the OpenAI SDK with base URL <span class="mono">https://openrouter.ai/api/v1</span>.</p>
+    <div class="key mono" id="key"></div>
+    <div class="row"><button id="copy">Copy key</button><button class="ghost" id="hide">I saved it</button></div>
+  </section>
+
+  <section>
+    <h2>Your tabs</h2>
+    <div id="tabs"><p class="muted">Connect a wallet to see your tabs.</p></div>
+  </section>
+
+  <section>
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="step">
+        <i>01</i>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <b>Lock</b><span>tokens wait in escrow</span>
+      </div>
+      <div class="step go">
+        <i>02</i>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+        <b>Use</b><span>one key, any app</span>
+      </div>
+      <div class="step">
+        <i>03</i>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+        <b>Close</b><span class="good">unused comes back</span>
+      </div>
+    </div>
+  </section>
+
+  <footer id="footer"></footer>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const OPEN = "0x7d1f50c0", APPROVE = "0x095ea7b3", ALLOWANCE = "0xdd62ed3e", BALANCE = "0x70a08231";
+const REQUEST_CLOSE = "0x6bf5fe6f", FORCE_RELEASE = "0x9bdd7cdb";
+const TAB_OPENED = "0x40a7ccdc57a7f4777c3a9cb8c53f5fa4eec8bef2930cb746c5d1bb2d8f634246";
+let config, account, provider, quoteTimer;
+
+// --- tiny ABI and unit helpers: every argument here is a static 32-byte word ---
+const word = (hex) => hex.replace(/^0x/, "").toLowerCase().padStart(64, "0");
+const uint = (n) => word(BigInt(n).toString(16));
+const call = (selector, ...words) => selector + words.join("");
+const randomWord = () => "0x" + [...crypto.getRandomValues(new Uint8Array(32))].map((b) => b.toString(16).padStart(2, "0")).join("");
+function parseUnits(value, decimals) {
+  const m = /^(\d*)(?:\.(\d*))?$/.exec(value.trim());
+  if (!m || (!m[1] && !m[2])) return null;
+  const frac = (m[2] || "").slice(0, decimals).padEnd(decimals, "0");
+  return BigInt(m[1] || "0") * 10n ** BigInt(decimals) + BigInt(frac || "0");
+}
+function formatUnits(value, decimals, places = 4) {
+  const v = BigInt(value), base = 10n ** BigInt(decimals);
+  const frac = (v % base).toString().padStart(decimals, "0").slice(0, places).replace(/0+$/, "");
+  return (v / base).toLocaleString("en-US") + (frac ? "." + frac : "");
+}
+const usd = (s) => "$" + Number(s).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const short = (a) => a.slice(0, 6) + "…" + a.slice(-4);
+
+async function api(path, init) {
+  const res = await fetch(path, { ...init, headers: { "content-type": "application/json" } });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw Object.assign(new Error(body.error?.message || `Request failed (${res.status})`), { code: body.error?.code });
+  return body;
+}
+const rpc = (method, params = []) => provider.request({ method, params });
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+function say(text, bad = false) { $("status").textContent = text; $("status").className = "status" + (bad ? " bad" : ""); }
+
+async function receipt(hash) {
+  for (;;) {
+    const r = await rpc("eth_getTransactionReceipt", [hash]);
+    if (r) { if (r.status !== "0x1") throw new Error("Transaction reverted."); return r; }
+    await sleep(1500);
+  }
+}
+async function send(to, data) {
+  const hash = await rpc("eth_sendTransaction", [{ from: account, to, data }]);
+  return receipt(hash);
+}
+
+// --- wallet ---
+function findProvider() {
+  if (window.ethereum) return Promise.resolve(window.ethereum);
+  return new Promise((resolve) => {
+    window.addEventListener("eip6963:announceProvider", (e) => resolve(e.detail.provider), { once: true });
+    window.dispatchEvent(new Event("eip6963:requestProvider"));
+    setTimeout(() => resolve(null), 500);
+  });
+}
+async function connect() {
+  provider = await findProvider();
+  if (!provider) return say("No browser wallet found. Install one, or use the CLI.", true);
+  [account] = await rpc("eth_requestAccounts");
+  account = account.toLowerCase();
+  const chainId = parseInt(await rpc("eth_chainId"), 16);
+  if (chainId !== config.chainId) {
+    try { await rpc("wallet_switchEthereumChain", [{ chainId: "0x" + config.chainId.toString(16) }]); }
+    catch { return say(`Switch your wallet to chain ${config.chainId}.`, true); }
+  }
+  $("connect").textContent = short(account);
+  $("connect").className = "ghost";
+  provider.on?.("accountsChanged", () => location.reload());
+  provider.on?.("chainChanged", () => location.reload());
+  updateQuote();
+  loadTabs();
+}
+
+// --- opening a tab ---
+const selected = () => config.tokens.find((t) => t.address === $("token").value);
+function updateQuote() {
+  clearTimeout(quoteTimer);
+  quoteTimer = setTimeout(async () => {
+    const token = selected(), amount = parseUnits($("amount").value, token.decimals);
+    $("open").textContent = account ? "Open tab" : "Connect wallet";
+    $("open").disabled = !!account;
+    if (!amount) { $("quote").innerHTML = `<span class="muted">Tabs buy ${usd(config.minTabUsd)}–${usd(config.maxTabUsd)} of inference. 1 ${token.symbol} ≈ ${token.priceUsd ? "$" + token.priceUsd : "unpriced"}.</span>`; return; }
+    try {
+      const q = await api(`/api/quote?token=${token.address}&amount=${amount}`);
+      let text = `Buys a <b>${usd(q.limitUsd)}</b> OpenRouter key.`;
+      if (q.capped) text += ` <span class="muted">That is the per-tab cap; the rest comes back when you close.</span>`;
+      if (q.belowMinimum) text = `<span class="muted">That buys ${usd(q.limitUsd)}, below the ${usd(config.minTabUsd)} minimum.</span>`;
+      if (account) {
+        const balance = BigInt(await rpc("eth_call", [{ to: token.address, data: call(BALANCE, word(account)) }, "latest"]));
+        if (balance < amount) text = `<span class="muted">You hold ${formatUnits(balance, token.decimals)} ${token.symbol}.</span>`;
+        else $("open").disabled = q.belowMinimum;
+      }
+      $("quote").innerHTML = text;
+    } catch (e) { $("quote").innerHTML = `<span class="muted">${e.message}</span>`; }
+  }, 250);
+}
+
+async function openTab() {
+  const token = selected(), amount = parseUnits($("amount").value, token.decimals);
+  $("open").disabled = true;
+  try {
+    const allowance = BigInt(await rpc("eth_call", [{ to: token.address, data: call(ALLOWANCE, word(account), word(config.escrow)) }, "latest"]));
+    if (allowance < amount) { say(`Approve ${token.symbol} in your wallet (1 of 3)…`); await send(token.address, call(APPROVE, word(config.escrow), uint(amount))); }
+    say("Confirm the lock in your wallet (2 of 3)…");
+    const r = await send(config.escrow, call(OPEN, word(token.address), word(randomWord()), uint(amount)));
+    const log = r.logs.find((l) => l.address.toLowerCase() === config.escrow && l.topics[0] === TAB_OPENED);
+    const tabId = log.topics[1];
+    say("Locked. Waiting for the server to see it…");
+    for (let i = 0; ; i++) {
+      try { await api(`/api/tabs/${tabId}`); break; } catch (e) { if (e.code !== "not_found" || i > 90) throw e; await sleep(2000); }
+    }
+    await claim(tabId);
+    $("amount").value = "";
+  } catch (e) { say(e.message || String(e), true); }
+  updateQuote();
+  loadTabs();
+}
+
+async function claim(tabId) {
+  say("Sign to receive your key (3 of 3). Signing is free.");
+  const { message, expiresAt } = await api(`/api/tabs/${tabId}/claim-message`);
+  const hex = "0x" + [...new TextEncoder().encode(message)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  const signature = await rpc("personal_sign", [hex, account]);
+  const { key } = await api(`/api/tabs/${tabId}/claim`, { method: "POST", body: JSON.stringify({ signature, expiresAt }) });
+  $("key").textContent = key;
+  $("reveal").hidden = false;
+  $("reveal").scrollIntoView({ behavior: "smooth", block: "center" });
+  say("");
+}
+
+// --- your tabs ---
+async function loadTabs() {
+  if (!account) return;
+  const { tabs } = await api(`/api/tabs?owner=${account}`);
+  const root = $("tabs");
+  if (!tabs.length) { root.innerHTML = `<p class="muted">No tabs yet.</p>`; return; }
+  root.innerHTML = "";
+  for (const t of tabs) {
+    const d = t.token.decimals ?? 18, sym = t.token.symbol ?? short(t.token.address);
+    const state = t.closeRequested && t.state !== "closed" ? "closing" : t.state;
+    const pct = Number(t.limitUsd) > 0 ? Math.min(100, (Number(t.usageUsd) / Number(t.limitUsd)) * 100) : 0;
+    const el = document.createElement("div");
+    el.className = "tab";
+    el.innerHTML = `
+      <div class="row" style="justify-content:space-between">
+        <b>${formatUnits(t.locked, d)} ${sym}</b><span class="pill ${state}">${state}</span>
+      </div>
+      <div class="bar"><div style="width:${pct}%"></div></div>
+      <div class="facts muted">
+        <span>${usd(t.usageUsd)} of ${usd(t.limitUsd)} used</span>
+        <span>${t.refunded !== null ? `${formatUnits(t.refunded, d)} ${sym} returned` : `${formatUnits(t.charged, d)} ${sym} charged`}</span>
+        <span class="mono">${t.keyHint ? "sk-or-…" + t.keyHint : short(t.id)}</span>
+      </div>
+      ${t.note ? `<p class="muted" style="font-size:13px;margin-top:6px">${t.note}</p>` : ""}
+      <div class="row" style="margin-top:10px"></div>`;
+    const actions = el.lastElementChild;
+    const action = (label, run, ghost = true) => {
+      const b = document.createElement("button");
+      b.textContent = label; if (ghost) b.className = "ghost";
+      b.onclick = async () => { b.disabled = true; try { await run(); } catch (e) { say(e.message || String(e), true); } loadTabs(); };
+      actions.append(b);
+    };
+    if (t.state === "open" && !t.claimed && !t.closeRequested) action("Get key", () => claim(t.id), false);
+    if (t.state !== "closed" && !t.closeRequested) action("Close", () => send(config.escrow, call(REQUEST_CLOSE, word(t.id))));
+    if (t.state !== "closed" && t.closeRequested) action("Force release", () => send(config.escrow, call(FORCE_RELEASE, word(t.id))));
+    root.append(el);
+  }
+}
+
+// --- boot ---
+(async () => {
+  config = await api("/api/config");
+  for (const t of config.tokens) $("token").append(new Option(`${t.symbol}${t.priceUsd ? ` · $${Number(Number(t.priceUsd).toPrecision(4))}` : ""}`, t.address));
+  const sinkNote = /^0x0{36}dead$/i.test(config.sink) ? "burned" : `sent to ${short(config.sink)}`;
+  $("footer").innerHTML = `Escrow <span class="mono">${short(config.escrow)}</span> on chain ${config.chainId} · charged tokens are ${sinkNote} · ` +
+    `${config.markupBps > 10000 ? `${(config.markupBps / 100 - 100).toFixed(1)}% over provider cost` : "at provider cost"} · ` +
+    `force release after ${Math.round(config.closeTimeoutSeconds / 3600)}h · <a href="/skill.md">agent skill</a>`;
+  $("token").onchange = updateQuote;
+  $("amount").oninput = updateQuote;
+  $("connect").onclick = connect;
+  $("open").onclick = () => (account ? openTab() : connect());
+  $("copy").onclick = async () => { await navigator.clipboard.writeText($("key").textContent); $("copy").textContent = "Copied"; };
+  $("hide").onclick = () => { $("key").textContent = ""; $("reveal").hidden = true; $("copy").textContent = "Copy key"; };
+  updateQuote();
+  setInterval(loadTabs, 10_000);
+})().catch((e) => say(e.message, true));
+</script>
+</body>
+</html>

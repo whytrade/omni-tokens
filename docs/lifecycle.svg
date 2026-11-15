@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 240" width="880" height="240" role="img" aria-labelledby="title">
+  <title id="title">A tab goes open, active, settling, closed. If the server goes silent, the owner pulls the tokens out after the timeout.</title>
+  <style>
+    .bg{fill:#f3f3f4;stroke:#e4e4e6}.paper{fill:#fff;stroke:#e4e4e6}
+    .ink{fill:#2c2c2c}.mute{fill:#8a8a8d}.acc{fill:#1e61f5}.accS{stroke:#1e61f5}.white{fill:#fff}.inv{fill:#fff}
+    .muteS{stroke:#8a8a8d;fill:none}
+    .t{font-family:Figtree,Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+    .m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.08em}
+    @media (prefers-color-scheme:dark){
+      .bg{fill:#111113;stroke:#2c2c30}.paper{fill:#1b1b1e;stroke:#2c2c30}
+      .ink{fill:#ececee}.acc{fill:#3d74ff}.accS{stroke:#3d74ff}.inv{fill:#111113}
+    }
+  </style>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mute"/></marker></defs>
+  <rect class="bg" x="0.5" y="0.5" width="879" height="239" rx="10"/>
+  <g class="t" text-anchor="middle">
+    <rect class="paper" x="40.5" y="60.5" width="150" height="44" rx="6"/>
+    <text x="115" y="88" class="ink" font-size="15" font-weight="700">open</text>
+    <text x="115" y="128" class="mute" font-size="12">locked, no key yet</text>
+
+    <rect class="acc" x="250" y="60" width="151" height="45" rx="6"/>
+    <text x="325" y="88" class="white" font-size="15" font-weight="700">active</text>
+    <text x="325" y="128" class="mute" font-size="12">key works</text>
+
+    <rect class="paper accS" x="461" y="61" width="148" height="42" rx="6" stroke-width="2"/>
+    <text x="535" y="88" class="ink" font-size="15" font-weight="700">settling</text>
+    <text x="535" y="128" class="mute" font-size="12">key off, final bill</text>
+
+    <rect class="ink" x="670" y="60" width="151" height="45" rx="6"/>
+    <text x="745" y="88" class="inv" font-size="15" font-weight="700">closed</text>
+    <text x="745" y="128" class="mute" font-size="12">change refunded</text>
+
+    <g class="m mute" font-size="10" font-weight="600"><text x="220" y="48">SIGN</text><text x="430" y="48">CLOSE OR SPENT</text><text x="640" y="48">~2 MIN</text></g>
+  </g>
+  <g class="muteS" stroke-width="1.5" marker-end="url(#a)"><path d="M194 82h50"/><path d="M405 82h50"/><path d="M613 82h51"/></g>
+  <path class="muteS" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="5 4" marker-end="url(#a)" d="M325 140V196H745V146"/>
+  <text x="535" y="218" class="t mute" font-size="13" text-anchor="middle">server silent? pull your tokens out after the timeout</text>
+</svg>

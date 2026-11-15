@@ -1,0 +1,16 @@
+[profile.default]
+src = "contracts"
+test = "contracts/test"
+libs = ["lib"]
+out = "out"
+solc_version = "0.8.26"
+evm_version = "cancun"
+remappings = ["forge-std/=lib/forge-std/src/"]
+
+[lint]
+lint_on_build = false
+
+[invariant]
+runs = 64
+depth = 64
+fail_on_revert = true
